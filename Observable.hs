@@ -1,18 +1,24 @@
+module Data.Ref where
 
 import Data.Unique
 import System.IO.Unsafe
 import Control.Applicative
 
-module Data.Ref where
+--------------------------------------------------------------------------------
+-- * References
+--------------------------------------------------------------------------------
 
-data Ref a = Ref { refNr :: Unique , deref :: a } deriving Eq
+data Ref a = Ref { refNr :: Unique , deref :: a }
+
+instance Eq (Ref a) where
+  Ref u1 _ == Ref u2 _ = u1 == u2
 
 instance Show a => Show (Ref a) where
   show (Ref u x) = "(Ref " ++ show (hashUnique u) ++ " " ++ show x ++ ")"
 
 ref :: a -> Ref a
-ref x = unsafePerformIO $ (\u -> Ref u x) <$> newUnique
+ref x = unsafePerformIO $ flip Ref x <$> newUnique
 {-# NOINLINE ref #-}
 
-(<=>) :: Ref a -> Ref a -> Bool
-(Ref u1 _) <=> (Ref u2 _) = u1 == u2
+--------------------------------------------------------------------------------
+-- the end.
