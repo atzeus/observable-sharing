@@ -1,6 +1,6 @@
 module Data.Ref where
 
-import Data.Unique
+import System.Mem.StableName
 import System.IO.Unsafe
 import Control.Applicative
 
@@ -8,16 +8,16 @@ import Control.Applicative
 -- * References
 --------------------------------------------------------------------------------
 
-data Ref a = Ref { refNr :: Unique , deref :: a }
+data Ref a = Ref { label :: StableName a, deref :: a }
 
 instance Eq (Ref a) where
-  Ref u1 _ == Ref u2 _ = u1 == u2
+  Ref s1 _ == Ref s2 _ = s1 == s2
 
 instance Show a => Show (Ref a) where
-  show (Ref u x) = "(Ref " ++ show (hashUnique u) ++ " " ++ show x ++ ")"
+  show (Ref s x) = "(Ref " ++ show (hashStableName s) ++ " " ++ show x ++ ")"
 
 ref :: a -> Ref a
-ref x = unsafePerformIO $ flip Ref x <$> newUnique
+ref x = unsafePerformIO $ flip Ref x <$> makeStableName x
 {-# NOINLINE ref #-}
 
 --------------------------------------------------------------------------------

@@ -19,8 +19,8 @@ module Data.Ref.Map (
   ) where
 
 import Data.Ref
-import Data.Unique
 import Unsafe.Coerce -- lets use all the unsafe operations!
+import System.Mem.StableName (hashStableName)
 
 import qualified Data.HashMap.Lazy as H
 
@@ -49,7 +49,7 @@ empty = Map H.empty
 
 -- | Construct a map with a single element.
 singleton :: Ref a -> f a -> Map f
-singleton (Ref u _) v = Map $ H.singleton (hashUnique u) (Hide v)
+singleton (Ref u _) v = Map $ H.singleton (hashStableName u) (Hide v)
 
 --------------------------------------------------------------------------------
 -- ** Basic interface
@@ -64,25 +64,25 @@ size (Map m) = H.size m
 
 -- | Returns 'True' if the reference is present in the map, 'False' otherwise.
 member :: Ref a -> Map f -> Bool
-member (Ref u _) (Map m) = H.member (hashUnique u) m
+member (Ref u _) (Map m) = H.member (hashStableName u) m
 
 -- | Returns the value associated with the reference, or 'Nothing' if the reference
 -- has no value associated to it.
 lookup :: Ref a -> Map f -> Maybe (f a)
-lookup (Ref u _) (Map m) = fmap unsafeCoerce $ H.lookup (hashUnique u) m
+lookup (Ref u _) (Map m) = fmap unsafeCoerce $ H.lookup (hashStableName u) m
 
 -- | Associates a reference with the specified value. If the map already contains
 -- a mapping for the reference, the old value is replaced.
 insert :: Ref a -> f a -> Map f -> Map f
-insert (Ref u _) v (Map m) = Map $ H.insert (hashUnique u) (Hide v) m
+insert (Ref u _) v (Map m) = Map $ H.insert (hashStableName u) (Hide v) m
 
 -- | Removes the associated value of a reference, if any is present in the map.
 delete :: Ref a -> Map f -> Map f
-delete (Ref u _) (Map m) = Map $ H.delete (hashUnique u) m
+delete (Ref u _) (Map m) = Map $ H.delete (hashStableName u) m
 
 -- | Updates the associated value of a reference, if any is present in the map.
 adjust :: (f a -> f b) -> Ref a -> Map f -> Map f
-adjust f (Ref u _) (Map m) = Map $ H.adjust (\(Hide v) -> Hide $ f $ unsafeCoerce v) (hashUnique u) m
+adjust f (Ref u _) (Map m) = Map $ H.adjust (\(Hide v) -> Hide $ f $ unsafeCoerce v) (hashStableName u) m
 
 --------------------------------------------------------------------------------
 -- ** Combine

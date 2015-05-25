@@ -13,12 +13,12 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,1,0,1] []
+version = Version [0,2,0,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/mararon/.cabal/bin"
-libdir     = "/home/mararon/.cabal/lib/x86_64-linux-ghc-7.10.1/obser_0VQXjroaTop2BGXJezGVi2"
-datadir    = "/home/mararon/.cabal/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.1.0.1"
+libdir     = "/home/mararon/.cabal/lib/x86_64-linux-ghc-7.10.1/obser_IgpMoA6eUZTFtN1EwN2xNu"
+datadir    = "/home/mararon/.cabal/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.2.0.0"
 libexecdir = "/home/mararon/.cabal/libexec"
 sysconfdir = "/home/mararon/.cabal/etc"
 
