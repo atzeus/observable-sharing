@@ -17,7 +17,7 @@ version = Version [0,2,0,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/mararon/.cabal/bin"
-libdir     = "/home/mararon/.cabal/lib/x86_64-linux-ghc-7.10.1/obser_IgpMoA6eUZTFtN1EwN2xNu"
+libdir     = "/home/mararon/.cabal/lib/x86_64-linux-ghc-7.10.1/obser_0VnIEgx9TzEB1dyS63SLKL"
 datadir    = "/home/mararon/.cabal/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.2.0.0"
 libexecdir = "/home/mararon/.cabal/libexec"
 sysconfdir = "/home/mararon/.cabal/etc"

@@ -13,12 +13,12 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,1,1,0] []
+version = Version [0,2,0,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
 bindir     = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/bin"
-libdir     = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/obser_CfnpHq0FW2OD0CJKAVrGwx"
-datadir    = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.1.1.0"
+libdir     = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/obser_IgpMoA6eUZTFtN1EwN2xNu"
+datadir    = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.2.0.0"
 libexecdir = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/libexec"
 sysconfdir = "/home/mararon/chalmers/repos/signal/.cabal-sandbox/etc"
 
