@@ -7,12 +7,12 @@
   (major1) == 4 && (major2) <  8 || \
   (major1) == 4 && (major2) == 8 && (minor) <= 0)
 
-/* package unordered-containers-0.2.5.1 */
-#define VERSION_unordered_containers "0.2.5.1"
-#define MIN_VERSION_unordered_containers(major1,major2,minor) (\
+/* package containers-0.5.6.2 */
+#define VERSION_containers "0.5.6.2"
+#define MIN_VERSION_containers(major1,major2,minor) (\
   (major1) <  0 || \
-  (major1) == 0 && (major2) <  2 || \
-  (major1) == 0 && (major2) == 2 && (minor) <= 5)
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 6)
 
 /* tool alex-3.1.4 */
 #define TOOL_VERSION_alex "3.1.4"
@@ -91,5 +91,5 @@
   (major1) == 2 && (major2) <  25 || \
   (major1) == 2 && (major2) == 25 && (minor) <= 0)
 
-#define CURRENT_PACKAGE_KEY "obser_IgpMoA6eUZTFtN1EwN2xNu"
+#define CURRENT_PACKAGE_KEY "obser_9KMtfknY8FMAza9RKvB13D"
 

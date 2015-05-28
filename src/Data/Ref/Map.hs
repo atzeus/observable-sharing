@@ -1,7 +1,8 @@
 {-# LANGUAGE GADTs #-}
 
-module Data.Ref.Map {-(
+module Data.Ref.Map (
     Map
+  , Name
   , empty
   , singleton
   , null
@@ -14,9 +15,7 @@ module Data.Ref.Map {-(
   , union
   , difference
   , intersection
-  , map
-  , filter
-  )-} where
+  ) where
 
 import Data.Ref
 import Data.List (find, deleteBy)

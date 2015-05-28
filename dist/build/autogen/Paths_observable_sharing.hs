@@ -13,14 +13,14 @@ catchIO :: IO a -> (Exception.IOException -> IO a) -> IO a
 catchIO = Exception.catch
 
 version :: Version
-version = Version [0,2,0,0] []
+version = Version [0,2,1,0] []
 bindir, libdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/home/mararon/.cabal/bin"
-libdir     = "/home/mararon/.cabal/lib/x86_64-linux-ghc-7.10.1/obser_0VnIEgx9TzEB1dyS63SLKL"
-datadir    = "/home/mararon/.cabal/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.2.0.0"
-libexecdir = "/home/mararon/.cabal/libexec"
-sysconfdir = "/home/mararon/.cabal/etc"
+bindir     = "/home/mararon/chalmers/repos/observable-sharing/.cabal-sandbox/bin"
+libdir     = "/home/mararon/chalmers/repos/observable-sharing/.cabal-sandbox/lib/x86_64-linux-ghc-7.10.1/obser_CXuZT2bXgtWAaxJlp0rEgr"
+datadir    = "/home/mararon/chalmers/repos/observable-sharing/.cabal-sandbox/share/x86_64-linux-ghc-7.10.1/observable-sharing-0.2.1.0"
+libexecdir = "/home/mararon/chalmers/repos/observable-sharing/.cabal-sandbox/libexec"
+sysconfdir = "/home/mararon/chalmers/repos/observable-sharing/.cabal-sandbox/etc"
 
 getBinDir, getLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "observable_sharing_bindir") (\_ -> return bindir)

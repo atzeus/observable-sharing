@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                observable-sharing
-version:             0.2.0.0
+version:             0.2.1.1
 synopsis:            Simple observable sharing
 -- description:         
 license:             BSD3
@@ -10,7 +10,10 @@ license-file:        LICENSE
 author:              Atze van der Ploeg <atzeus@gmail.com>,
                      Markus Aronsson <mararon@chalmers.se>
 maintainer:          mararon@chalmers.se
--- copyright:           
+-- copyright:
+homepage:            https://github.com/atzeus/observable-sharing
+description:         Simple observable sharing inspired by the paper "Observable Sharing
+                     for Functional Circuit Description".
 category:            Data
 build-type:          Simple
 -- extra-source-files:  
