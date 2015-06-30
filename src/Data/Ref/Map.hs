@@ -98,8 +98,10 @@ delete (Ref n _) map@(Map m) = Map $ M.update del (hashStableName n) m
 adjust :: (f a -> f b) -> Ref a -> Map f -> Map f
 adjust f (Ref n _) (Map m) = Map $ M.adjust fun (hashStableName n) m
   where
-    fun xs = fmap (\p@(Hide x, _) -> if eqStableName x n then apa p else p) xs
-    apa (n, Hide v) = (n, Hide $ f $ unsafeCoerce v)
+    fun xs = flip fmap xs $ \pair@(Hide x, Hide v) ->
+      if eqStableName x n
+      then (Hide x, Hide $ f $ unsafeCoerce v)
+      else pair
 
 --------------------------------------------------------------------------------
 -- ** Combine
