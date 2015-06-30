@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, Rank2Types #-}
 
 module Data.Ref.Map (
     Map
@@ -15,6 +15,7 @@ module Data.Ref.Map (
   , union
   , difference
   , intersection
+  , debug
   ) where
 
 import Data.Ref
@@ -74,9 +75,11 @@ member n (Map m) = M.member (hashStableName n) m
 -- | Finds the value associated with the name, or 'Nothing' if the name has no
 -- value associated to it.
 lookup :: Name a -> Map f -> Maybe (f a)
-lookup n (Map m) = case M.lookup (hashStableName n) m of
+lookup n (Map m) =  case M.lookup (hashStableName n) m of
   Nothing -> Nothing
-  Just xs -> fmap unsafeCoerce $ find (\(Hide x, _) -> eqStableName x n) xs
+  Just xs -> case find (\(Hide x,_) -> eqStableName x n) xs of
+    Nothing         -> Nothing
+    Just (_,Hide f) -> Just $ unsafeCoerce f
 
 -- | Associates a reference with the specified value. If the map already contains
 -- a mapping for the reference, the old value is replaced.
@@ -112,5 +115,14 @@ difference (Map m) (Map n) = Map $ M.difference m n
 -- | Intersectino of two maps.
 intersection :: Map f -> Map f -> Map f
 intersection (Map m) (Map n) = Map $ M.intersection m n
+
+--------------------------------------------------------------------------------
+-- ** Debug
+
+debug :: Map f -> (forall a. f a -> String) -> IO ()
+debug (Map m) f = do
+  let es = flip fmap (M.elems m) $ fmap (\(Hide x, Hide y) -> (hashStableName x, f y))
+  putStrLn $ "*** Debug"
+    ++ "\n\t elems: " ++ show es
 
 --------------------------------------------------------------------------------
