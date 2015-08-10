@@ -8,23 +8,28 @@ module Data.Ref.Map (
   , null
   , size
   , member
+  , (!)
   , lookup
   , insert
   , delete
   , adjust
+  , hmap
   , union
   , difference
   , intersection
+    -- eehh...
+  , HideType(..)
+  , dump
   , debug
   ) where
 
 import Data.Ref
 import Data.List (find, deleteBy)
 import Data.Function (on)
-import Unsafe.Coerce -- lets use all the unsafe operations!
+import Unsafe.Coerce
 import System.Mem.StableName
 
-import           Data.IntMap (IntMap)
+import Data.IntMap (IntMap)
 import qualified Data.IntMap as M
 
 import Prelude hiding (null, lookup, map, filter)
@@ -72,6 +77,10 @@ size (Map m) = M.size m
 member :: Name a -> Map f -> Bool
 member n (Map m) = M.member (hashStableName n) m
 
+-- | Unsafe lookup
+(!) :: Map f -> Name a -> f a
+(!) m name = maybe (error "Data.Ref.Map.(!)") id (lookup name m)
+
 -- | Finds the value associated with the name, or 'Nothing' if the name has no
 -- value associated to it.
 lookup :: Name a -> Map f -> Maybe (f a)
@@ -87,21 +96,34 @@ insert :: Ref a -> f a -> Map f -> Map f
 insert (Ref n _) v (Map m) = Map $ M.insertWith (++) (hashStableName n) [(Hide n, Hide v)] m
 
 -- | Removes the associated value of a reference, if any is present in the map.
-delete :: Ref a -> Map f -> Map f
-delete (Ref n _) map@(Map m) = Map $ M.update del (hashStableName n) m
+delete :: Name a -> Map f -> Map f
+delete n map@(Map m) = Map $ M.update del (hashStableName n) m
   where
     del (_:[]) = Nothing
     del xs     = Just $ deleteBy apa (Hide n, undefined) xs
     apa (Hide x, _) (Hide y, _) = eqStableName x y
 
 -- | Updates the associated value of a reference, if any is present in the map.
-adjust :: (f a -> f b) -> Ref a -> Map f -> Map f
-adjust f (Ref n _) (Map m) = Map $ M.adjust fun (hashStableName n) m
+adjust :: (f a -> f b) -> Name a -> Map f -> Map f
+adjust f n (Map m) = Map $ M.adjust fun (hashStableName n) m
   where
     fun xs = flip fmap xs $ \pair@(Hide x, Hide v) ->
       if eqStableName x n
       then (Hide x, Hide $ f $ unsafeCoerce v)
       else pair
+
+--------------------------------------------------------------------------------
+-- ** Traversal
+
+hmap :: (f a -> h a) -> Map f -> Map h
+hmap f (Map m) = Map $ M.map (fmap $ fmap h) m
+  where
+    h (Hide x) = Hide $ f $ unsafeCoerce x
+
+traverse' :: Applicative t => (f a -> t (h a)) -> Map f -> t (Map h)
+traverse' f (Map m) = Map <$> traverse (sequenceA . fmap h) m
+  where
+    h (n, Hide x) = ((,) n) <$> Hide <$> (f $ unsafeCoerce x)
 
 --------------------------------------------------------------------------------
 -- ** Combine
@@ -120,6 +142,9 @@ intersection (Map m) (Map n) = Map $ M.intersection m n
 
 --------------------------------------------------------------------------------
 -- ** Debug
+
+dump :: Map f -> [[(HideType Name, HideType f)]]
+dump (Map m) = M.elems m
 
 debug :: Map f -> (forall a. f a -> String) -> IO ()
 debug (Map m) f = do
