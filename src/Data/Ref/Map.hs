@@ -20,12 +20,13 @@ module Data.Ref.Map (
     -- eehh...
   , HideType(..)
   , dump
-  , debug
   ) where
 
+import Control.Applicative ((<$>))
 import Data.Ref
 import Data.List (find, deleteBy)
 import Data.Function (on)
+
 import Unsafe.Coerce
 import System.Mem.StableName
 
@@ -120,11 +121,6 @@ hmap f (Map m) = Map $ M.map (fmap $ fmap h) m
   where
     h (Hide x) = Hide $ f $ unsafeCoerce x
 
-traverse' :: Applicative t => (f a -> t (h a)) -> Map f -> t (Map h)
-traverse' f (Map m) = Map <$> traverse (sequenceA . fmap h) m
-  where
-    h (n, Hide x) = ((,) n) <$> Hide <$> (f $ unsafeCoerce x)
-
 --------------------------------------------------------------------------------
 -- ** Combine
 
@@ -141,15 +137,9 @@ intersection :: Map f -> Map f -> Map f
 intersection (Map m) (Map n) = Map $ M.intersection m n
 
 --------------------------------------------------------------------------------
--- ** Debug
+-- ** Debug - These are probably not safe
 
 dump :: Map f -> [[(HideType Name, HideType f)]]
 dump (Map m) = M.elems m
-
-debug :: Map f -> (forall a. f a -> String) -> IO ()
-debug (Map m) f = do
-  let es = flip fmap (M.elems m) $ fmap (\(Hide x, Hide y) -> (hashStableName x, f y))
-  putStrLn $ "*** Debug"
-    ++ "\n\t elems: " ++ show es
 
 --------------------------------------------------------------------------------
