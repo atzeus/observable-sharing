@@ -139,6 +139,8 @@ intersection (Map m) (Map n) = Map $ M.intersection m n
 --------------------------------------------------------------------------------
 -- ** Debug - These are probably not safe
 
+-- data Entry f = forall a. Entry a (f a)
+
 dump :: Map f -> [[(HideType Name, HideType f)]]
 dump (Map m) = M.elems m
 
