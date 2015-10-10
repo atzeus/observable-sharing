@@ -3,23 +3,25 @@
 module Data.Ref.Map (
     Map
   , Name
-  , empty
-  , singleton
-  , null
-  , size
-  , member
-  , (!)
-  , lookup
-  , insert
-  , delete
-  , adjust
-  , hmap
+    
+  , empty      -- :: Map f
+  , singleton  -- :: Name a -> f a -> Map f 
+  , null       -- :: Map f -> Bool
+  , size       -- :: Map f -> Int
+  , member     -- :: Name a -> Map f -> Bool
+  , (!)        -- :: Name a -> Map f -> f a
+  , lookup     -- :: Name a -> Map f -> Maybe (f a)
+  , insert     -- :: Ref a -> f a -> Map f -> Map f
+  , delete     -- :: Name a -> Map f -> Map f
+  , adjust     -- :: (f a -> f b) -> Name a -> Map f -> Map f
+  , hmap       -- :: (f a -> h a) -> Map f -> Map h
   , union
   , difference
   , intersection
+    
     -- eehh...
-  , HideType(..)
-  , dump
+  , Entry(..)
+  , elems
   ) where
 
 import Control.Applicative ((<$>))
@@ -103,7 +105,7 @@ delete n map@(Map m) = Map $ M.update del (hashStableName n) m
     del xs = Just $ deleteBy eq (Hide n, undefined) xs
 
     eq  :: (HideType Name, x) -> (HideType Name, y) -> Bool
-    eq  (Hide x, _) (Hide y, _) = eqStableName x y
+    eq  (Hide x, _) (Hide y, _) = x `eqStableName` y
 
 -- | Updates the associated value of a reference, if any is present in the map.
 adjust :: forall f a b. (f a -> f b) -> Name a -> Map f -> Map f
@@ -140,11 +142,16 @@ intersection :: Map f -> Map f -> Map f
 intersection (Map m) (Map n) = Map $ M.intersection m n
 
 --------------------------------------------------------------------------------
--- ** Debug - These are probably not safe
+-- Still not sure about these.
 
--- data Entry f = forall a. Entry a (f a)
+-- | ...
+data Entry f = forall a. Entry (Name a) (f a)
 
-dump :: Map f -> [[(HideType Name, HideType f)]]
-dump (Map m) = M.elems m
+-- | Fetches all the elements of a map.
+elems :: Map f -> [Entry f]
+elems (Map m) = fmap pack . concat $ M.elems m
+  where
+    pack :: (HideType Name, HideType f) -> Entry f
+    pack (Hide n, Hide f) = Entry n (unsafeCoerce f)
 
 --------------------------------------------------------------------------------
