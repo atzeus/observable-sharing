@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, Rank2Types #-}
+{-# LANGUAGE GADTs, ScopedTypeVariables #-}
 
 module Data.Ref.Map (
     Map
@@ -39,17 +39,15 @@ import Prelude hiding (null, lookup, map, filter)
 -- * Reference indexed maps
 --------------------------------------------------------------------------------
 
--- | Shorthand
+-- | Shorthand for stable names
 type Name  = StableName
 
 -- | HideType, for hiding types!
-data HideType f
-  where
-    Hide :: f a -> HideType f
+data HideType f where
+  Hide :: f a -> HideType f
 
 -- | A reference indexed map.
---
--- useful for associating info with a reference.
+--   Useful for associating info with a reference.
 data Map f = Map (IntMap [(HideType Name, HideType f)])
 
 --------------------------------------------------------------------------------
@@ -97,29 +95,34 @@ insert :: Ref a -> f a -> Map f -> Map f
 insert (Ref n _) v (Map m) = Map $ M.insertWith (++) (hashStableName n) [(Hide n, Hide v)] m
 
 -- | Removes the associated value of a reference, if any is present in the map.
-delete :: Name a -> Map f -> Map f
+delete :: forall f a. Name a -> Map f -> Map f
 delete n map@(Map m) = Map $ M.update del (hashStableName n) m
   where
-    del (_:[]) = Nothing
-    del xs     = Just $ deleteBy apa (Hide n, undefined) xs
-    apa (Hide x, _) (Hide y, _) = eqStableName x y
+    del :: [(HideType Name, HideType f)] -> Maybe [(HideType Name, HideType f)]
+    del [] = Nothing
+    del xs = Just $ deleteBy eq (Hide n, undefined) xs
+
+    eq  :: (HideType Name, x) -> (HideType Name, y) -> Bool
+    eq  (Hide x, _) (Hide y, _) = eqStableName x y
 
 -- | Updates the associated value of a reference, if any is present in the map.
-adjust :: (f a -> f b) -> Name a -> Map f -> Map f
-adjust f n (Map m) = Map $ M.adjust fun (hashStableName n) m
+adjust :: forall f a b. (f a -> f b) -> Name a -> Map f -> Map f
+adjust f n (Map m) = Map $ M.adjust (fmap open) (hashStableName n) m
   where
-    fun xs = flip fmap xs $ \pair@(Hide x, Hide v) ->
-      if eqStableName x n
-      then (Hide x, Hide $ f $ unsafeCoerce v)
-      else pair
+    open :: (HideType Name, HideType f) -> (HideType Name, HideType f)
+    open pair@(Hide x, Hide v)
+      | x `eqStableName` n = (Hide x, Hide $ f $ unsafeCoerce v)
+      | otherwise          = pair
 
 --------------------------------------------------------------------------------
 -- ** Traversal
 
-hmap :: (f a -> h a) -> Map f -> Map h
-hmap f (Map m) = Map $ M.map (fmap $ fmap h) m
+-- | Map over the container types
+hmap :: forall f h a. (f a -> h a) -> Map f -> Map h
+hmap f (Map m) = Map $ M.map (fmap $ fmap open) m
   where
-    h (Hide x) = Hide $ f $ unsafeCoerce x
+    open :: HideType f -> HideType h
+    open (Hide x) = Hide $ f $ unsafeCoerce x
 
 --------------------------------------------------------------------------------
 -- ** Combine
