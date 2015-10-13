@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ScopedTypeVariables #-}
+{-# LANGUAGE GADTs, ScopedTypeVariables, Rank2Types #-}
 
 module Data.Ref.Map (
     Map
@@ -14,6 +14,7 @@ module Data.Ref.Map (
   , insert     -- :: Ref a -> f a -> Map f -> Map f
   , delete     -- :: Name a -> Map f -> Map f
   , adjust     -- :: (f a -> f b) -> Name a -> Map f -> Map f
+  , filter     -- :: (f a -> Bool) -> Map f -> Map f
   , hmap       -- :: (f a -> h a) -> Map f -> Map h
   , union
   , difference
@@ -115,6 +116,13 @@ adjust f n (Map m) = Map $ M.adjust (fmap open) (hashStableName n) m
     open pair@(Hide x, Hide v)
       | x `eqStableName` n = (Hide x, Hide $ f $ unsafeCoerce v)
       | otherwise          = pair
+
+-- | Filters the map for values matching the predicate
+filter :: (forall a. f a -> Bool) -> Map f -> Map f
+filter f (Map m) = Map $ M.filter (unwrap f) m
+  where
+    unwrap :: (forall a. f a -> Bool) -> [(HideType Name, HideType f)] -> Bool
+    unwrap f = and . fmap (\(_, Hide a) -> f a)
 
 --------------------------------------------------------------------------------
 -- ** Traversal
