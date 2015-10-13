@@ -51,6 +51,8 @@ data HideType f where
 
 -- | A reference indexed map.
 --   Useful for associating info with a reference.
+--
+--   Note: this is generally unsound when `f` is a GADT!
 data Map f = Map (IntMap [(HideType Name, HideType f)])
 
 --------------------------------------------------------------------------------
