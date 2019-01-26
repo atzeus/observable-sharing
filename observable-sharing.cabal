@@ -2,7 +2,7 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                observable-sharing
-version:             0.2.4
+version:             0.2.5
 synopsis:            Simple observable sharing
 -- description:         
 license:             BSD3

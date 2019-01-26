@@ -20,9 +20,9 @@ module Data.Ref.Map (
   , difference
   , intersection
     
-    -- eehh...
   , Entry(..)
-  , elems
+  , toList     -- :: Map f -> [(Name a, f a)]
+  , fromList   -- :: [(Name a, f a)] -> Map f
   ) where
 
 import Control.Applicative ((<$>))
@@ -42,15 +42,14 @@ import Prelude hiding (null, lookup, map, filter)
 -- * Reference indexed maps
 --------------------------------------------------------------------------------
 
--- | Shorthand for stable names
-type Name  = StableName
+-- | Shorthand for stable names.
+type Name = StableName
 
--- | HideType, for hiding types!
+-- | For hiding types.
 data HideType f where
   Hide :: f a -> HideType f
 
--- | A reference indexed map.
---   Useful for associating info with a reference.
+-- | A reference indexed map. Useful for associating info with a reference.
 --
 --   Note: this is generally unsound when `f` is a GADT!
 data Map f = Map (IntMap [(HideType Name, HideType f)])
@@ -90,9 +89,9 @@ member n (Map m) = M.member (hashStableName n) m
 lookup :: Name a -> Map f -> Maybe (f a)
 lookup n (Map m) =  case M.lookup (hashStableName n) m of
   Nothing -> Nothing
-  Just xs -> case find (\(Hide x,_) -> eqStableName x n) xs of
-    Nothing         -> Nothing
-    Just (_,Hide f) -> Just $ unsafeCoerce f
+  Just xs -> case find (\(Hide x, _) -> eqStableName x n) xs of
+    Nothing          -> Nothing
+    Just (_, Hide f) -> Just $ unsafeCoerce f
 
 -- | Associates a reference with the specified value. If the map already contains
 -- a mapping for the reference, the old value is replaced.
@@ -152,16 +151,26 @@ intersection :: Map f -> Map f -> Map f
 intersection (Map m) (Map n) = Map $ M.intersection m n
 
 --------------------------------------------------------------------------------
--- Still not sure about these.
+-- ** Lists
 
--- | ...
+-- | Entry in map.
 data Entry f = forall a. Entry (Name a) (f a)
 
 -- | Fetches all the elements of a map.
-elems :: Map f -> [Entry f]
-elems (Map m) = fmap pack . concat $ M.elems m
+toList :: Map f -> [Entry f]
+toList (Map m) = fmap pack . concat $ M.elems m
   where
     pack :: (HideType Name, HideType f) -> Entry f
     pack (Hide n, Hide f) = Entry n (unsafeCoerce f)
+
+-- | Constructs a map from a list of entries.
+fromList :: [Entry f] -> Map f
+fromList = Map . M.fromList . fmap keys . fmap unpack
+  where
+    unpack :: Entry f -> (HideType Name, HideType f)
+    unpack (Entry n f) = (Hide n, Hide f)
+
+    keys :: (HideType Name, HideType f) -> (M.Key, [(HideType Name, HideType f)])
+    keys e@(Hide n, _) = (hashStableName n, [e])
 
 --------------------------------------------------------------------------------
